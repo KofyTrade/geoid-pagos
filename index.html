@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#05161a">
+<title>GeoiD VPN · pago</title>
+<style>
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:#05161a;color:#e8fbf7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
+       padding:20px 14px;min-height:100vh;overflow-x:hidden}
+  .caja{width:100%;max-width:400px;margin:0 auto;background:#0b2429;border:1px solid #1e5a58;
+        border-radius:22px;padding:22px}
+  h1{font-size:15px;letter-spacing:2px;color:#5fd9c8;font-weight:500;text-align:center;margin-bottom:4px}
+  h2{font-size:13px;color:#7fa8a4;font-weight:400;text-align:center;margin-bottom:20px}
+  .plan{background:#13333a;border-radius:14px;padding:14px 16px;margin-bottom:16px}
+  .fila{display:flex;justify-content:space-between;font-size:14px;padding:3px 0;gap:12px}
+  .fila b{color:#2ee6c5;white-space:nowrap}
+  .fila span{color:#cfe9e5}
+  .qr{background:#fff;border-radius:16px;padding:10px;text-align:center;margin-bottom:14px;min-height:80px;
+      display:flex;align-items:center;justify-content:center}
+  .qr img{width:100%;max-width:280px;display:block}
+  .nota{font-size:12px;color:#4e7c79;text-align:center;margin-bottom:14px}
+  a.pagar{display:block;text-align:center;padding:15px;border-radius:16px;background:#2ee6c5;color:#05161a;
+          font-size:15px;font-weight:600;text-decoration:none}
+  a.pagar:active{transform:scale(.99)}
+  .pasos{font-size:12px;color:#4e7c79;line-height:1.55;margin-top:14px}
+  .aviso{font-size:11px;color:#3f6663;text-align:center;margin-top:16px;line-height:1.45}
+</style>
+</head>
+<body>
+<div class="caja">
+  <h1>GEOID-VPN</h1>
+  <h2>Pago de la suscripción</h2>
+
+  <div class="plan">
+    <div class="fila"><span>Plan</span><b id="plan">—</b></div>
+    <div class="fila"><span>Acceso</span><b id="dias">—</b></div>
+    <div class="fila"><span>Importe</span><b id="importe">—</b></div>
+    <div class="fila" id="fila-regalo" style="display:none"><span>Regalo</span><b id="regalo">—</b></div>
+  </div>
+
+  <div class="qr">
+    <img id="imagen-qr" src="qr.png" alt="QR de pago SBP"
+         onerror="this.style.display='none';document.getElementById('sin-qr').style.display='block';">
+  </div>
+  <div class="nota" id="sin-qr" style="display:none">El QR se está configurando. Escribe al bot y te lo enviamos.</div>
+
+  <a class="pagar" id="pagar" href="https://t.me/geoidvpn_bot">Ya he pagado</a>
+
+  <div class="pasos">
+    1. Escanea el QR con tu banco.<br>
+    2. Envía el importe exacto y confirma.<br>
+    3. Vuelve y pulsa el botón: se abre tu bot de Telegram.
+  </div>
+
+  <div class="aviso">Tu acceso se activa en minutos y recibes la configuración en Telegram.<br>
+  Nunca pedimos contraseña ni código de acceso.</div>
+</div>
+
+<script>
+  // Precios y duraciones (deben coincidir con el bot)
+  const PLANES = {
+    1:  { precio: 150,  dias: 30,  nombre: "1 mes",   regalo: "" },
+    3:  { precio: 399,  dias: 90,  nombre: "3 meses", regalo: "1 proxy de Telegram" },
+    6:  { precio: 699,  dias: 200, nombre: "6 meses", regalo: "2 proxies + 20 días extra" }
+  };
+
+  const params = new URLSearchParams(location.search);
+  let p = parseInt(params.get("p") || "1", 10);
+  if (!PLANES[p]) p = 1;
+
+  const datos = PLANES[p];
+  document.getElementById("plan").textContent = datos.nombre;
+  document.getElementById("dias").textContent = datos.dias + " días";
+  document.getElementById("importe").textContent = datos.precio + " ₽";
+
+  if (datos.regalo) {
+    document.getElementById("fila-regalo").style.display = "flex";
+    document.getElementById("regalo").textContent = datos.regalo;
+  }
+
+  const boton = document.getElementById("pagar");
+  boton.textContent = "Ya he pagado " + datos.precio + " ₽";
+  boton.href = "https://t.me/geoidvpn_bot?start=pagado_" + p;
+</script>
+</body>
+</html>
