@@ -1,16 +1,20 @@
 <!doctype html>
-<html lang="es">
+<html lang="ru">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="theme-color" content="#05161a">
-<title>GeoiD VPN · pago</title>
+<title>GEOID-VPN · оплата</title>
 <style>
   *{box-sizing:border-box;margin:0;padding:0}
   body{background:#05161a;color:#e8fbf7;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;
        padding:20px 14px;min-height:100vh;overflow-x:hidden}
   .caja{width:100%;max-width:400px;margin:0 auto;background:#0b2429;border:1px solid #1e5a58;
-        border-radius:22px;padding:22px}
+        border-radius:22px;padding:22px;position:relative}
+  .idiomas{position:absolute;top:14px;right:14px;display:flex;gap:4px}
+  .idiomas button{width:auto;padding:3px 7px;border-radius:8px;border:1px solid #1e5a58;background:#0b2429;
+                  color:#7fa8a4;font-size:10px;cursor:pointer;letter-spacing:.5px}
+  .idiomas button.activo{background:#13333a;color:#2ee6c5;border-color:#2ee6c5}
   h1{font-size:15px;letter-spacing:2px;color:#5fd9c8;font-weight:500;text-align:center;margin-bottom:4px}
   h2{font-size:13px;color:#7fa8a4;font-weight:400;text-align:center;margin-bottom:20px}
   .plan{background:#13333a;border-radius:14px;padding:14px 16px;margin-bottom:16px}
@@ -24,65 +28,145 @@
   a.pagar{display:block;text-align:center;padding:15px;border-radius:16px;background:#2ee6c5;color:#05161a;
           font-size:15px;font-weight:600;text-decoration:none}
   a.pagar:active{transform:scale(.99)}
-  .pasos{font-size:12px;color:#4e7c79;line-height:1.55;margin-top:14px}
-  .aviso{font-size:11px;color:#3f6663;text-align:center;margin-top:16px;line-height:1.45}
+  .pasos{font-size:12px;color:#6f9c98;line-height:1.6;margin-top:14px}
+  .aviso{font-size:11px;color:#4e7c79;text-align:center;margin-top:16px;line-height:1.5}
 </style>
 </head>
 <body>
 <div class="caja">
+  <div class="idiomas">
+    <button type="button" data-idioma="ru" class="activo">РУ</button>
+    <button type="button" data-idioma="es">ES</button>
+    <button type="button" data-idioma="en">EN</button>
+  </div>
+
   <h1>GEOID-VPN</h1>
-  <h2>Pago de la suscripción</h2>
+  <h2 id="subtitulo">Оплата подписки</h2>
 
   <div class="plan">
-    <div class="fila"><span>Plan</span><b id="plan">—</b></div>
-    <div class="fila"><span>Acceso</span><b id="dias">—</b></div>
-    <div class="fila"><span>Importe</span><b id="importe">—</b></div>
-    <div class="fila" id="fila-regalo" style="display:none"><span>Regalo</span><b id="regalo">—</b></div>
+    <div class="fila"><span id="et-plan">План</span><b id="plan">—</b></div>
+    <div class="fila"><span id="et-dias">Доступ</span><b id="dias">—</b></div>
+    <div class="fila"><span id="et-importe">Сумма</span><b id="importe">—</b></div>
+    <div class="fila" id="fila-regalo" style="display:none"><span id="et-regalo">Подарок</span><b id="regalo">—</b></div>
   </div>
 
   <div class="qr">
-    <img id="imagen-qr" src="qr.png" alt="QR de pago SBP"
+    <img id="imagen-qr" src="qr.png" alt="QR для оплаты"
          onerror="this.style.display='none';document.getElementById('sin-qr').style.display='block';">
   </div>
-  <div class="nota" id="sin-qr" style="display:none">El QR se está configurando. Escribe al bot y te lo enviamos.</div>
+  <div class="nota" id="sin-qr" style="display:none"></div>
 
-  <a class="pagar" id="pagar" href="https://t.me/geoidvpn_bot">Ya he pagado</a>
+  <a class="pagar" id="pagar" href="https://t.me/geoidvpn_bot">—</a>
 
-  <div class="pasos">
-    1. Escanea el QR con tu banco.<br>
-    2. Envía el importe exacto y confirma.<br>
-    3. Vuelve y pulsa el botón: se abre tu bot de Telegram.
-  </div>
-
-  <div class="aviso">Tu acceso se activa en minutos y recibes la configuración en Telegram.<br>
-  Nunca pedimos contraseña ni código de acceso.</div>
+  <div class="pasos" id="pasos"></div>
+  <div class="aviso" id="aviso"></div>
 </div>
 
 <script>
-  // Precios y duraciones (deben coincidir con el bot)
+  const TEXTOS = {
+    ru: {
+      titulo: "Оплата подписки",
+      etPlan: "Тариф", etDias: "Доступ", etImporte: "Сумма", etRegalo: "Подарок",
+      meses: ["", "1 месяц", "3 месяца", "6 месяцев"],
+      dias: "дней",
+      regalos: ["", "1 прокси Telegram", "2 прокси + 20 дней"],
+      pagar: "Я уже оплатил",
+      sinQr: "QR готовится. Напишите боту — пришлём.",
+      pasos: "1. Отсканируйте QR в приложении банка.<br>" +
+             "2. Отправьте точную сумму и подтвердите.<br>" +
+             "3. Вернитесь и нажмите кнопку — откроется бот в Telegram.",
+      aviso: "Доступ активируется в течение нескольких минут, конфигурация придёт в Telegram.<br>" +
+             "Мы никогда не спрашиваем пароль или код входа."
+    },
+    es: {
+      titulo: "Pago de la suscripción",
+      etPlan: "Plan", etDias: "Acceso", etImporte: "Importe", etRegalo: "Regalo",
+      meses: ["", "1 mes", "3 meses", "6 meses"],
+      dias: "días",
+      regalos: ["", "1 proxy de Telegram", "2 proxies + 20 días"],
+      pagar: "Ya he pagado",
+      sinQr: "El QR se está configurando. Escribe al bot y te lo enviamos.",
+      pasos: "1. Escanea el QR con tu banco.<br>" +
+             "2. Envía el importe exacto y confirma.<br>" +
+             "3. Vuelve y pulsa el botón: se abre tu bot de Telegram.",
+      aviso: "Tu acceso se activa en minutos y recibes la configuración en Telegram.<br>" +
+             "Nunca pedimos contraseña ni código de acceso."
+    },
+    en: {
+      titulo: "Subscription payment",
+      etPlan: "Plan", etDias: "Access", etImporte: "Amount", etRegalo: "Gift",
+      meses: ["", "1 month", "3 months", "6 months"],
+      dias: "days",
+      regalos: ["", "1 Telegram proxy", "2 proxies + 20 days"],
+      pagar: "I already paid",
+      sinQr: "The QR is being set up. Message the bot and we will send it.",
+      pasos: "1. Scan the QR with your bank app.<br>" +
+             "2. Send the exact amount and confirm.<br>" +
+             "3. Come back and press the button: your Telegram bot opens.",
+      aviso: "Access is activated within minutes and the configuration arrives in Telegram.<br>" +
+             "We never ask for your password or a login code."
+    }
+  };
+
   const PLANES = {
-    1:  { precio: 150,  dias: 30,  nombre: "1 mes",   regalo: "" },
-    3:  { precio: 399,  dias: 90,  nombre: "3 meses", regalo: "1 proxy de Telegram" },
-    6:  { precio: 699,  dias: 200, nombre: "6 meses", regalo: "2 proxies + 20 días extra" }
+    1: { precio: 150, dias: 30,  regalo: 0 },
+    3: { precio: 399, dias: 90,  regalo: 1 },
+    6: { precio: 699, dias: 200, regalo: 2 }
   };
 
   const params = new URLSearchParams(location.search);
   let p = parseInt(params.get("p") || "1", 10);
   if (!PLANES[p]) p = 1;
 
-  const datos = PLANES[p];
-  document.getElementById("plan").textContent = datos.nombre;
-  document.getElementById("dias").textContent = datos.dias + " días";
-  document.getElementById("importe").textContent = datos.precio + " ₽";
+  // Ruso por defecto; ?lang=es o el botón cambian el idioma.
+  let idioma = (params.get("lang") || "ru").toLowerCase();
+  if (!TEXTOS[idioma]) idioma = "ru";
 
-  if (datos.regalo) {
-    document.getElementById("fila-regalo").style.display = "flex";
-    document.getElementById("regalo").textContent = datos.regalo;
+  function pintar() {
+    const T = TEXTOS[idioma];
+    const D = PLANES[p];
+
+    document.documentElement.lang = idioma;
+    document.title = "GEOID-VPN · " + T.titulo;
+    document.getElementById("subtitulo").textContent = T.titulo;
+    document.getElementById("et-plan").textContent = T.etPlan;
+    document.getElementById("et-dias").textContent = T.etDias;
+    document.getElementById("et-importe").textContent = T.etImporte;
+    document.getElementById("et-regalo").textContent = T.etRegalo;
+
+    document.getElementById("plan").textContent = T.meses[p];
+    document.getElementById("dias").textContent = D.dias + " " + T.dias;
+    document.getElementById("importe").textContent = D.precio + " ₽";
+
+    const filaRegalo = document.getElementById("fila-regalo");
+    if (D.regalo) {
+      filaRegalo.style.display = "flex";
+      document.getElementById("regalo").textContent = T.regalos[D.regalo];
+    } else {
+      filaRegalo.style.display = "none";
+    }
+
+    const boton = document.getElementById("pagar");
+    boton.textContent = T.pagar + " " + D.precio + " ₽";
+    boton.href = "https://t.me/geoidvpn_bot?start=pagado_" + p;
+
+    document.getElementById("sin-qr").textContent = T.sinQr;
+    document.getElementById("pasos").innerHTML = T.pasos;
+    document.getElementById("aviso").innerHTML = T.aviso;
+
+    document.querySelectorAll(".idiomas button").forEach((b) => {
+      b.classList.toggle("activo", b.dataset.idioma === idioma);
+    });
   }
 
-  const boton = document.getElementById("pagar");
-  boton.textContent = "Ya he pagado " + datos.precio + " ₽";
-  boton.href = "https://t.me/geoidvpn_bot?start=pagado_" + p;
+  document.querySelectorAll(".idiomas button").forEach((b) => {
+    b.addEventListener("click", () => {
+      idioma = b.dataset.idioma;
+      pintar();
+    });
+  });
+
+  pintar();
 </script>
 </body>
 </html>
