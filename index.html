@@ -67,9 +67,9 @@
     ru: {
       titulo: "Оплата подписки",
       etPlan: "Тариф", etDias: "Доступ", etImporte: "Сумма", etRegalo: "Подарок",
-      meses: ["", "1 месяц", "3 месяца", "6 месяцев"],
+      meses: {1: "1 месяц", 3: "3 месяца", 6: "6 месяцев"},
       dias: "дней",
-      regalos: ["", "1 прокси Telegram", "2 прокси + 20 дней"],
+      regalos: {1: "1 прокси Telegram", 2: "2 прокси + 20 дней", 3: "2 прокси + 20 дней"},
       pagar: "Я уже оплатил",
       sinQr: "QR готовится. Напишите боту — пришлём.",
       pasos: "1. Отсканируйте QR в приложении банка.<br>" +
@@ -81,9 +81,9 @@
     es: {
       titulo: "Pago de la suscripción",
       etPlan: "Plan", etDias: "Acceso", etImporte: "Importe", etRegalo: "Regalo",
-      meses: ["", "1 mes", "3 meses", "6 meses"],
+      meses: {1: "1 mes", 3: "3 meses", 6: "6 meses"},
       dias: "días",
-      regalos: ["", "1 proxy de Telegram", "2 proxies + 20 días"],
+      regalos: {1: "1 proxy de Telegram", 2: "2 proxies + 20 días", 3: "2 proxies + 20 días"},
       pagar: "Ya he pagado",
       sinQr: "El QR se está configurando. Escribe al bot y te lo enviamos.",
       pasos: "1. Escanea el QR con tu banco.<br>" +
@@ -95,9 +95,9 @@
     en: {
       titulo: "Subscription payment",
       etPlan: "Plan", etDias: "Access", etImporte: "Amount", etRegalo: "Gift",
-      meses: ["", "1 month", "3 months", "6 months"],
+      meses: {1: "1 month", 3: "3 months", 6: "6 months"},
       dias: "days",
-      regalos: ["", "1 Telegram proxy", "2 proxies + 20 days"],
+      regalos: {1: "1 Telegram proxy", 2: "2 proxies + 20 days", 3: "2 proxies + 20 days"},
       pagar: "I already paid",
       sinQr: "The QR is being set up. Message the bot and we will send it.",
       pasos: "1. Scan the QR with your bank app.<br>" +
@@ -111,7 +111,7 @@
   const PLANES = {
     1: { precio: 150, dias: 30,  regalo: 0 },
     3: { precio: 399, dias: 90,  regalo: 1 },
-    6: { precio: 699, dias: 200, regalo: 2 }
+    6: { precio: 699, dias: 200, regalo: 3 }
   };
 
   const params = new URLSearchParams(location.search);
